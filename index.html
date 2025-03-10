@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博灵堂</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        img {
+            max-width: 80%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            filter: grayscale(100%);
+        }
+        audio {
+            margin: 10px 0;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        a {
+            color: #666;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <img src="pic.jpg" alt="小狐狸生前大头照">
+    <p>永远怀念</p>
+    <audio id="audio" controls autoplay>
+        <source src="YiJianMei.mp3" type="audio/mpeg">
+        您的浏览器不支持音频元素。
+    </audio>
+    <footer>
+        Powered by <a href="https://github.com/features/copilot" target="_blank">Github Copilot</a> & 
+        <a href="https://www.cloudflare.com" target="_blank">Cloudflare</a> | 
+        <a href="https://github.com/lsdoverdose/XHLCyberSpiritHall" target="_blank">Github 仓库</a>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const audio = document.getElementById('audio');
+            audio.play().catch(function(error) {
+                console.log("Auto-play prevented:", error);
+            });
+        });
+    </script>
+</body>
+</html>
