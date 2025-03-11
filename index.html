@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>给 小狐狸OvO 的赛博灵堂</title>
+    <title>赛博灵堂</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+        .main-content {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
         }
         img {
             max-width: 80%;
@@ -40,28 +46,394 @@
         a:hover {
             text-decoration: underline;
         }
+        .tribute-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .tribute-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .tribute-item img {
+            width: 50px;
+            height: 50px;
+            filter: none;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        .tribute-item:hover img {
+            transform: scale(1.1);
+        }
+        .tribute-count {
+            font-size: 14px;
+            color: #666;
+        }
+        .message-system {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #555;
+        }
+        #messageList {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .message-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .message-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #999;
+        }
+        .message-rain {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        overflow: hidden;
+    }
+    .rain-item {
+        position: absolute;
+        color: rgba(0, 0, 0, 0.4); /* 加深颜色 */
+        animation: rain linear infinite;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+    @keyframes rain {
+        0% {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.8;
+        }
+        90% {
+            opacity: 0.8;
+        }
+        100% {
+            transform: translateY(100vh);
+            opacity: 0;
+        }
+    }
+    .music-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin: 20px 0;
+    }
+    .song-list {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+    }
+    .upload-form {
+        margin-top: 10px;
+        text-align: center;
+    }
+    .upload-form input[type="file"] {
+        display: none;
+    }
+    .upload-label {
+        display: inline-block;
+        padding: 6px 12px;
+        background: #666;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .upload-label:hover {
+        background: #555;
+    }
     </style>
 </head>
 <body>
-    <img src="pic.jpg" alt="小狐狸生前大头照" width="360" height="280">
-    <h1>永远怀念</h1>
-    <p>于2025/3/10 18:04永远的离开了我们</p>
-    <audio id="audio" controls autoplay>
-        <source src="YiJianMei.mp3" type="audio/mpeg">
-        您的浏览器不支持音频元素。
-    </audio>
+    <img src="pic0.jpg" alt="小狐狸生前大头照" width="320" height="320"> <div class="message-rain" id="messageRain"></div>
+    <div class="main-content">
+    <p>永远怀念</p>
+    <p>2025/3/10 18:04走的</p>
+    </div>
+    <!-- 在 body 中添加死亡计时器显示 -->
+    <p id="deathTimer"></p>
+    
+    <div class="tribute-actions">
+        <div class="tribute-item" onclick="addTribute('flower')">
+            <img src="flower.png" alt="献花">
+            <span class="tribute-count" id="flowerCount">0 朵</span>
+        </div>
+        <div class="tribute-item" onclick="addTribute('candle')">
+            <img src="candle.png" id="candleImg" alt="点蜡烛">
+            <span class="tribute-count" id="candleCount">0 支</span>
+        </div>
+    </div>
+
+    <div class="music-container">
+        <select class="song-list" onchange="changeSong(this.value)">
+            <option value="YiJianMei.mp3">一剪梅</option>
+            <option value="TongHua.mp3">童话</option>
+            <option value="XiuLianAiQing.mp3">修炼爱情</option>
+            <option value="ZhiMing.mp3">志铭</option>
+            <option value="GaoBaiZhiYe.mp3">告白之夜</option>
+            <!-- 动态添加的歌曲选项将在这里 -->
+        </select>
+        
+        <audio id="audio" controls autoplay>
+            <source src="YiJianMei.mp3" type="audio/mpeg">
+            您的浏览器不支持音频元素。
+        </audio>
+    </div>
+    
+    <div class="upload-form">
+        <label for="songUpload" class="upload-label">
+            上传音乐
+        </label>
+        <input type="file" id="songUpload" accept="audio/*" onchange="uploadSong(event)">
+    </div>
+    
+
+    <div class="message-system">
+        <h3>留言祭奠</h3>
+        <form id="messageForm" onsubmit="return submitMessage(event)">
+            <div class="form-group">
+                <input type="text" id="name" name="name" placeholder="请输入您的名字（必填）" required>
+            </div>
+            <div class="form-group">
+                <textarea id="message" name="message" placeholder="请输入您的留言" rows="4"></textarea>
+            </div>
+            <button type="submit">提交留言</button>
+        </form>
+        <div id="messageList"></div>
+    </div>
+    
     <footer>
         Powered by <a href="https://github.com/features/copilot" target="_blank">Github Copilot</a> & 
         <a href="https://www.cloudflare.com" target="_blank">Cloudflare</a> | 
         <a href="https://github.com/lsdoverdose/XHLCyberSpiritHall" target="_blank">Github 仓库</a>
     </footer>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // 初始化数据
+        let tributes = JSON.parse(localStorage.getItem('tributes')) || { flower: 0, candle: 0 };
+        let userActions = JSON.parse(localStorage.getItem('userActions')) || { 
+            flower: { lastTime: null, done: false },
+            candle: { lastTime: null, done: false }
+        };
+        let messages = JSON.parse(localStorage.getItem('messages')) || [];
+        const deathTime = new Date('2025-03-10T18:04:00');
+    
+        // 检查是否需要重置每日操作
+        function checkAndResetDailyActions() {
+            const now = new Date();
+            for (let type in userActions) {
+                if (userActions[type].lastTime) {
+                    const lastActionDate = new Date(userActions[type].lastTime);
+                    if (lastActionDate.toDateString() !== now.toDateString()) {
+                        userActions[type].done = false;
+                    }
+                }
+            }
+            localStorage.setItem('userActions', JSON.stringify(userActions));
+        }
+    
+        // 更新死亡计时
+        function updateDeathTimer() {
+            const now = new Date();
+            const diff = now - deathTime;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById('deathTimer').textContent = 
+                `小狐狸已经离开我们 ${days}天${hours}小时${minutes}分钟`;
+        }
+
+        function addTribute(type) {
+            if(userActions[type].done) {
+                alert('您今天已经' + (type === 'flower' ? '献过花' : '点过蜡烛') + '了，明天再来吧！');
+                return;
+            }
+            
+            tributes[type]++;
+            userActions[type] = {
+                lastTime: new Date().toISOString(),
+                done: true
+            };
+            
+            document.getElementById(type + 'Count').textContent = 
+                tributes[type] + (type === 'flower' ? ' 朵' : ' 支');
+                
+            if(type === 'candle') {
+                document.getElementById('candleImg').src = 'candle_lighting.png';
+            }
+            
+            document.querySelector(`.tribute-item[onclick="addTribute('${type}')"]`).style.opacity = '0.5';
+            document.querySelector(`.tribute-item[onclick="addTribute('${type}')"]`).style.cursor = 'default';
+            
+            localStorage.setItem('userActions', JSON.stringify(userActions));
+            localStorage.setItem('tributes', JSON.stringify(tributes));
+        }
+    
+        // 提交留言
+        function submitMessage(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const message = document.getElementById('message').value.trim();
+            
+            if (!name) {
+                alert('请输入您的名字');
+                return false;
+            }
+            
+            const newMessage = {
+                name: name,
+                content: message,
+                time: new Date().toLocaleString()
+            };
+            
+            messages.unshift(newMessage);
+            localStorage.setItem('messages', JSON.stringify(messages));
+            
+            displayMessages();
+            document.getElementById('messageForm').reset();
+            return false;
+        }
+    
+        // 显示留言
+        function displayMessages() {
+            const messageList = document.getElementById('messageList');
+            messageList.innerHTML = messages.map(msg => `
+                <div class="message-item">
+                    <div class="message-name">${msg.name}</div>
+                    <div class="message-content">${msg.content}</div>
+                    <div class="message-time">${msg.time}</div>
+                </div>
+            `).join('');
+        }
+        function createMessageRain() {
+        const container = document.getElementById('messageRain');
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        
+        // 初始生成多个雨滴
+        for(let i = 0; i < 20; i++) {
+            createRainDrop(container, messages);
+        }
+
+        // 持续生成新的雨滴
+        setInterval(() => {
+            createRainDrop(container, messages);
+        }, 1000);
+    }
+
+    function createRainDrop(container, messages) {
+        if (messages.length > 0) {
+            const rainItem = document.createElement('div');
+            rainItem.className = 'rain-item';
+            rainItem.textContent = messages[Math.floor(Math.random() * messages.length)].content;
+            rainItem.style.left = Math.random() * 100 + '%';
+            rainItem.style.animationDuration = (Math.random() * 5 + 8) + 's'; // 延长动画时间
+            container.appendChild(rainItem);
+            
+            // 动画结束后删除元素
+            setTimeout(() => {
+                rainItem.remove();
+            }, 13000);
+        }
+    
+    }
+     // 添加歌曲切换功能
+     function changeSong(src) {
+        const audio = document.getElementById('audio');
+        audio.src = src;
+        audio.play().catch(function(error) {
+            console.log("Auto-play prevented:", error);
+        });
+    }
+
+    // 添加歌曲上传功能
+    function uploadSong(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const songList = document.querySelector('.song-list');
+            const option = document.createElement('option');
+            option.value = URL.createObjectURL(file);
+            option.textContent = file.name;
+            songList.appendChild(option);
+            songList.value = option.value;
+            changeSong(option.value);
+        }
+    }
+        
+    document.addEventListener('DOMContentLoaded', function() {
+            checkAndResetDailyActions();
+            updateDeathTimer();
+            setInterval(updateDeathTimer, 60000); // 每分钟更新一次
+    
+            // 更新显示
+            document.getElementById('flowerCount').textContent = tributes.flower + ' 朵';
+            document.getElementById('candleCount').textContent = tributes.candle + ' 支';
+            
+            if(userActions.candle.done) {
+                document.getElementById('candleImg').src = 'candle_lighting.png';
+                document.querySelector('.tribute-item[onclick="addTribute(\'candle\')"]').style.opacity = '0.5';
+                document.querySelector('.tribute-item[onclick="addTribute(\'candle\')"]').style.cursor = 'default';
+            }
+            
+            if(userActions.flower.done) {
+                document.querySelector('.tribute-item[onclick="addTribute(\'flower\')"]').style.opacity = '0.5';
+                document.querySelector('.tribute-item[onclick="addTribute(\'flower\')"]').style.cursor = 'default';
+            }
+    
             const audio = document.getElementById('audio');
             audio.play().catch(function(error) {
                 console.log("Auto-play prevented:", error);
             });
+            
+            displayMessages();
+
+            createMessageRain();
         });
+    
+
     </script>
+    
+
 </body>
 </html>
